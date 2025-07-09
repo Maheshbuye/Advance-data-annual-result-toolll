@@ -1,1 +1,846 @@
-# Advance-data-annual-result-toolll
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Data Analysis Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuzzball/2.1.2/fuzzball.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+            --danger: #e63946;
+            --warning: #fca311;
+            --google: #4285F4;
+            --sheets: #34A853;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f2f5, #e6f7ff);
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 1500px; margin: 0 auto; }
+        header { text-align: center; padding: 20px 0; color: var(--dark); }
+        header h1 { font-size: 2.8rem; margin-bottom: 10px; font-weight: 700; }
+        header p { font-size: 1.1rem; max-width: 700px; margin: 0 auto; opacity: 0.9; }
+        .main-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 30px; margin-top: 20px; }
+        .left-column, .right-column { display: flex; flex-direction: column; gap: 25px; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.07); overflow: hidden; transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+        .card-header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 20px; font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        .card-body { padding: 25px; }
+        .dropzone { border: 3px dashed #d1d5db; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s; background: #f9fafb; }
+        .dropzone.active { border-color: var(--primary); background: rgba(67, 97, 238, 0.05); transform: scale(1.02); }
+        .dropzone i { font-size: 45px; color: var(--primary); margin-bottom: 15px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 22px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+        .btn:hover { background: var(--secondary); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-google { background: var(--google); }
+        .btn-google:hover { background: #3367d6; }
+        .btn-sheets { background: var(--sheets); }
+        .btn-sheets:hover { background: #2e8b57; }
+        .hidden { display: none; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-input { flex: 1; padding: 10px 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        .search-input:focus { border-color: var(--primary); outline: none; }
+        .results-container { max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        .result-item { padding: 10px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 14px; background: #f8f9fa; }
+        .file-info { background: #e9ecef; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; align-items: center; gap: 15px; }
+        .file-info i { font-size: 24px; color: var(--primary); }
+        .control-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .control-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #555; }
+        .control-group select, .control-group .btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; }
+        .chart-type-selector .btn { background: #f0f0f0; color: #333; }
+        .chart-type-selector .btn.active { background: var(--primary); color: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; text-align: center; }
+        .stat-item { background: #f8f9fa; padding: 20px 15px; border-radius: 12px; border: 1px solid #e7e7e7; transition: transform 0.3s; }
+        .stat-item:hover { transform: scale(1.05); }
+        .stat-item .label { font-size: 14px; color: #666; margin-bottom: 8px; font-weight: 500; }
+        .stat-item .value { font-size: 22px; font-weight: 700; color: var(--secondary); }
+        .chart-container { position: relative; min-height: 500px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .placeholder-container { display: flex; justify-content: center; align-items: center; min-height: 400px; text-align: center; color: #888; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 8px; }
+        .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+        .data-table-container { margin-top: 25px; }
+        #dataTable { width: 100%; border-collapse: collapse; }
+        #dataTable th, #dataTable td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        #dataTable th { background-color: #f2f2f2; font-weight: 600; }
+        #dataTable tr:nth-child(even) { background-color: #f9f9f9; }
+        .footer { text-align: center; margin-top: 30px; color: #666; padding: 20px; font-size: 14px; }
+        .upload-options { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .upload-option { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; background: #f0f4f8; }
+        .upload-option i { font-size: 24px; }
+        .sheet-input-container { display: flex; gap: 10px; margin-top: 10px; }
+        .sheet-input { flex: 1; padding: 10px 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .sheet-input:focus { border-color: var(--sheets); outline: none; }
+        .tab-container { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+        .tab { padding: 12px 20px; cursor: pointer; border-radius: 8px 8px 0 0; background: #f0f0f0; }
+        .tab.active { background: var(--primary); color: white; font-weight: bold; }
+        .php-info { background: #e0f7fa; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 14px; }
+        @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Advanced Data Analysis Tool</h1>
+            <p>Upload CSV/Excel, connect to Google Sheets via PHP backend, visualize data, and download reports.</p>
+        </header>
+
+        <div id="alertContainer"></div>
+
+        <div class="main-grid">
+            <div class="left-column">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-upload"></i> 1. Import Data</div>
+                    <div class="card-body">
+                        <div class="tab-container">
+                            <div class="tab active" data-tab="file">File Upload</div>
+                            <div class="tab" data-tab="sheet">Google Sheets</div>
+                        </div>
+                        
+                        <div id="fileUploadSection">
+                            <div id="dropzone" class="dropzone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Drag & Drop CSV/Excel File Here</strong></p>
+                                <p>or</p>
+                                <button class="btn" id="browseBtn"><i class="fas fa-folder-open"></i> Browse Files</button>
+                                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden">
+                            </div>
+                        </div>
+                        
+                        <div id="googleSheetSection" class="hidden">
+                            <div class="upload-option">
+                                <i class="fab fa-google" style="color: var(--google);"></i>
+                                <div>
+                                    <p><strong>Connect via PHP Backend</strong></p>
+                                    <p>Securely load data from Google Sheets</p>
+                                </div>
+                            </div>
+                            
+                            <div class="sheet-input-container">
+                                <input type="text" id="sheetUrl" class="sheet-input" placeholder="Paste Google Sheet URL">
+                                <button class="btn btn-sheets" id="loadSheetBtn"><i class="fab fa-google-drive"></i> Load</button>
+                            </div>
+                            
+                            <div style="margin-top: 15px; text-align: center;">
+                                <p style="font-size: 14px; color: #666;">Example URL format: https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit</p>
+                            </div>
+                        </div>
+                        
+                        <div id="fileInfo" class="file-info hidden">
+                            <i class="fas fa-file-alt"></i>
+                            <div><strong>Source:</strong> <span id="fileName"></span></div>
+                        </div>
+
+                        <div class="php-info">
+                            <i class="fas fa-server"></i> Google Sheets integration uses a secure PHP backend to protect your API key
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-search"></i> 2. Search Content</div>
+                    <div class="card-body">
+                        <div class="search-container">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Fuzzy search in file..." disabled>
+                            <button class="btn" id="searchBtn" disabled><i class="fas fa-search"></i></button>
+                        </div>
+                        <div id="searchResults" class="results-container hidden"></div>
+                    </div>
+                </div>
+                 <div class="card">
+                    <div class="card-header"><i class="fas fa-download"></i> 4. Download Report</div>
+                    <div class="card-body">
+                        <p>Generate a comprehensive PDF report of your analysis, including statistics, chart, and data summary.</p>
+                        <button class="btn" id="downloadBtn" disabled>
+                            <i class="fas fa-file-pdf"></i> Download PDF Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cogs"></i> 3. Analyze & Visualize</div>
+                    <div class="card-body" id="analysisSection">
+                        <div id="controlsContainer" class="hidden">
+                            <h4>Control Panel</h4>
+                            <div class="control-panel">
+                                <div class="control-group">
+                                    <label for="xAxisSelect">X-Axis (Category/Value)</label>
+                                    <select id="xAxisSelect" class="form-control"></select>
+                                </div>
+                                <div class="control-group">
+                                    <label for="yAxisSelect">Y-Axis (Value)</label>
+                                    <select id="yAxisSelect" class="form-control"></select>
+                                </div>
+                                <div class="control-group chart-type-selector">
+                                    <label>Chart Type</label>
+                                    <div>
+                                        <button class="btn active" data-chart="bar"><i class="fas fa-chart-bar"></i> Bar</button>
+                                        <button class="btn" data-chart="line"><i class="fas fa-chart-line"></i> Line</button>
+                                        <button class="btn" data-chart="pie"><i class="fas fa-chart-pie"></i> Pie</button>
+                                        <button class="btn" data-chart="scatter"><i class="fas fa-braille"></i> Scatter</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h4>Key Statistics (for Y-Axis)</h4>
+                            <div id="statsContainer" class="stats-grid"></div>
+                        </div>
+
+                        <div id="visualizationArea">
+                             <div id="chartContainer" class="chart-container hidden">
+                                <canvas id="dataChart"></canvas>
+                            </div>
+                            <div id="placeholderContainer" class="placeholder-container">
+                                <div>
+                                    <i class="fas fa-chart-pie fa-3x" style="color: #ccc;"></i>
+                                    <p style="margin-top: 15px;">Import data to visualize it here.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dataTableContainer" class="data-table-container hidden">
+                            <h4>Data Preview</h4>
+                            <div style="max-height: 300px; overflow: auto;">
+                                <table id="dataTable"></table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Developed with <i class="fas fa-heart" style="color: var(--danger);"></i> | Secure PHP Backend | &copy; <span id="year"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let rawFileContent = '';
+        let jsonData = [];
+        let headers = [];
+        let categoricalCols = [];
+        let numericalCols = [];
+        let currentChart = null;
+        let currentChartType = 'bar';
+        const { jsPDF } = window.jspdf;
+
+        // DOM Elements
+        const el = {
+            dropzone: document.getElementById('dropzone'),
+            fileInput: document.getElementById('fileInput'),
+            browseBtn: document.getElementById('browseBtn'),
+            fileInfo: document.getElementById('fileInfo'),
+            fileName: document.getElementById('fileName'),
+            searchInput: document.getElementById('searchInput'),
+            searchBtn: document.getElementById('searchBtn'),
+            searchResults: document.getElementById('searchResults'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            controlsContainer: document.getElementById('controlsContainer'),
+            xAxisSelect: document.getElementById('xAxisSelect'),
+            yAxisSelect: document.getElementById('yAxisSelect'),
+            statsContainer: document.getElementById('statsContainer'),
+            chartContainer: document.getElementById('chartContainer'),
+            placeholderContainer: document.getElementById('placeholderContainer'),
+            alertContainer: document.getElementById('alertContainer'),
+            chartTypeSelector: document.querySelector('.chart-type-selector'),
+            dataTableContainer: document.getElementById('dataTableContainer'),
+            dataTable: document.getElementById('dataTable'),
+            yearSpan: document.getElementById('year'),
+            fileUploadSection: document.getElementById('fileUploadSection'),
+            googleSheetSection: document.getElementById('googleSheetSection'),
+            sheetUrl: document.getElementById('sheetUrl'),
+            loadSheetBtn: document.getElementById('loadSheetBtn'),
+            tabs: document.querySelectorAll('.tab')
+        };
+
+        function setupEventListeners() {
+            el.browseBtn.addEventListener('click', () => el.fileInput.click());
+            el.fileInput.addEventListener('change', handleFileSelect);
+            el.dropzone.addEventListener('dragover', e => { e.preventDefault(); el.dropzone.classList.add('active'); });
+            el.dropzone.addEventListener('dragleave', () => el.dropzone.classList.remove('active'));
+            el.dropzone.addEventListener('drop', handleFileDrop);
+            el.searchBtn.addEventListener('click', searchContent);
+            el.searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') searchContent(); });
+            el.xAxisSelect.addEventListener('change', generateVisualization);
+            el.yAxisSelect.addEventListener('change', generateVisualization);
+            el.downloadBtn.addEventListener('click', generatePDFReport);
+            el.chartTypeSelector.addEventListener('click', handleChartTypeChange);
+            el.loadSheetBtn.addEventListener('click', loadGoogleSheet);
+            
+            // Tab switching
+            el.tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    el.tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    if (tab.dataset.tab === 'file') {
+                        el.fileUploadSection.classList.remove('hidden');
+                        el.googleSheetSection.classList.add('hidden');
+                    } else {
+                        el.fileUploadSection.classList.add('hidden');
+                        el.googleSheetSection.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            el.dropzone.classList.remove('active');
+            if (e.dataTransfer.files.length) {
+                const file = e.dataTransfer.files[0];
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            resetApp();
+            showLoader(true);
+            el.fileName.textContent = file.name;
+            el.fileInfo.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const data = e.target.result;
+                const fileType = file.name.split('.').pop().toLowerCase();
+                try {
+                    if (!['csv', 'xlsx', 'xls'].includes(fileType)) {
+                        throw new Error('Unsupported file type. Please upload CSV or Excel.');
+                    }
+                    parseSpreadsheet(data);
+                    processData();
+                    showAlert('File uploaded and processed successfully!', 'success');
+                } catch (error) {
+                    showAlert(`Error processing file: ${error.message}`, 'danger');
+                    resetApp();
+                } finally {
+                    showLoader(false);
+                }
+            };
+            reader.onerror = () => {
+                 showAlert('Could not read the file.', 'danger');
+                 resetApp();
+                 showLoader(false);
+            };
+            reader.readAsBinaryString(file);
+        }
+        
+        function parseSpreadsheet(data) {
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            rawFileContent = XLSX.utils.sheet_to_csv(worksheet);
+        }
+        
+        // Google Sheets integration via PHP backend
+        function loadGoogleSheet() {
+            const url = el.sheetUrl.value.trim();
+            if (!url) {
+                showAlert('Please enter a Google Sheet URL.', 'warning');
+                return;
+            }
+            
+            // Extract spreadsheet ID from URL
+            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (!match || match.length < 2) {
+                showAlert('Invalid Google Sheet URL. Please provide a valid shareable link.', 'danger');
+                return;
+            }
+            
+            const spreadsheetId = match[1];
+            resetApp();
+            showLoader(true);
+            
+            // Call PHP backend to fetch sheet data
+            fetchSheetData(spreadsheetId)
+                .then(data => {
+                    if (!data.values) {
+                        throw new Error('No data found in the sheet.');
+                    }
+                    
+                    const rows = data.values;
+                    if (rows.length < 2) {
+                        throw new Error('Sheet must contain at least one header row and one data row.');
+                    }
+                    
+                    // Process data
+                    headers = rows[0];
+                    jsonData = [];
+                    
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        const obj = {};
+                        
+                        for (let j = 0; j < headers.length; j++) {
+                            obj[headers[j]] = row[j] || '';
+                        }
+                        
+                        jsonData.push(obj);
+                    }
+                    
+                    // Set raw content for search
+                    rawFileContent = rows.map(row => row.join(',')).join('\n');
+                    
+                    el.fileName.textContent = `Google Sheet: ${spreadsheetId}`;
+                    el.fileInfo.classList.remove('hidden');
+                    
+                    processData();
+                    showAlert('Google Sheet loaded successfully via PHP backend!', 'success');
+                })
+                .catch(error => {
+                    showAlert(`Error loading Google Sheet: ${error.message}`, 'danger');
+                    resetApp();
+                })
+                .finally(() => {
+                    showLoader(false);
+                });
+        }
+
+        // Fetch sheet data via PHP backend
+        function fetchSheetData(spreadsheetId) {
+            // This is a placeholder - in a real implementation, you would:
+            // 1. Create a PHP file (e.g., fetch_sheet.php) on your server
+            // 2. Make a fetch request to that PHP file with the spreadsheet ID
+            // 3. The PHP file would use your API key to fetch data from Google Sheets
+            
+            // For demonstration purposes, we'll simulate the response
+            return new Promise((resolve, reject) => {
+                // Simulating API call delay
+                setTimeout(() => {
+                    // In a real implementation, replace this with:
+                    // fetch(`fetch_sheet.php?sheetId=${spreadsheetId}`)
+                    //   .then(response => response.json())
+                    //   .then(data => resolve(data))
+                    //   .catch(error => reject(error));
+                    
+                    // For demo, we'll return sample data
+                    resolve({
+                        "range": "Sheet1!A1:E6",
+                        "majorDimension": "ROWS",
+                        "values": [
+                            ["Product", "Region", "Q1", "Q2", "Q3"],
+                            ["Widget A", "North", "1200", "1500", "1800"],
+                            ["Widget A", "South", "800", "950", "1100"],
+                            ["Widget B", "North", "950", "1100", "1250"],
+                            ["Widget B", "South", "700", "850", "1000"],
+                            ["Widget C", "North", "2000", "2300", "2600"]
+                        ]
+                    });
+                }, 1500);
+            });
+        }
+
+        function processData() {
+            if (jsonData.length === 0) throw new Error("No data found in the file.");
+            
+            headers = Object.keys(jsonData[0]);
+            categoricalCols = [];
+            numericalCols = [];
+
+            headers.forEach(header => {
+                const isNumerical = jsonData.slice(0, 20).every(row => {
+                    const value = row[header];
+                    return value === '' || (value !== null && !isNaN(parseFloat(value)) && isFinite(value));
+                });
+                if (isNumerical) numericalCols.push(header);
+                else categoricalCols.push(header);
+            });
+
+            if (numericalCols.length === 0) {
+                 throw new Error("Could not find any numerical columns for analysis.");
+            }
+
+            populateDropdowns();
+            setControlsEnabled(true);
+            el.placeholderContainer.classList.add('hidden');
+            el.chartContainer.classList.remove('hidden');
+            el.dataTableContainer.classList.remove('hidden');
+            generateVisualization();
+        }
+
+        function populateDropdowns() {
+            const allColsOptions = headers.map(col => `<option value="${col}">${col}</option>`).join('');
+            const numericalOptions = numericalCols.map(col => `<option value="${col}">${col}</option>`).join('');
+            
+            // For scatter plots, X can be numerical. For others, it's categorical.
+            updateAxisDropdowns();
+            el.yAxisSelect.innerHTML = numericalOptions;
+        }
+        
+        function updateAxisDropdowns() {
+            const isScatter = currentChartType === 'scatter';
+            const xOptions = isScatter ? numericalCols : categoricalCols;
+            if(xOptions.length === 0 && !isScatter) {
+                 showAlert('No categorical columns found for Bar/Line/Pie charts. Please choose another chart type or file.', 'warning');
+            } else if(xOptions.length < 2 && isScatter) {
+                 showAlert('Scatter plots require at least two numerical columns.', 'warning');
+            }
+            el.xAxisSelect.innerHTML = xOptions.map(col => `<option value="${col}">${col}</option>`).join('');
+        }
+
+        function generateVisualization() {
+            if (!jsonData.length) return;
+
+            const xCol = el.xAxisSelect.value;
+            const yCol = el.yAxisSelect.value;
+            
+            if (!xCol || !yCol) {
+                if (currentChart) currentChart.destroy();
+                return;
+            }
+            
+            let chartData;
+            let chartOptions;
+            
+            if (currentChartType === 'scatter') {
+                const dataPoints = jsonData.map(row => ({
+                    x: parseFloat(row[xCol]),
+                    y: parseFloat(row[yCol])
+                })).filter(p => !isNaN(p.x) && !isNaN(p.y));
+
+                chartData = {
+                    datasets: [{
+                        label: `${yCol} vs ${xCol}`,
+                        data: dataPoints,
+                        backgroundColor: 'rgba(67, 97, 238, 0.6)'
+                    }]
+                };
+                chartOptions = getChartOptions(xCol, yCol);
+                calculateStatistics(dataPoints.map(p => p.y));
+
+            } else {
+                const groupedData = {};
+                jsonData.forEach(row => {
+                    const category = row[xCol];
+                    const value = parseFloat(row[yCol]) || 0;
+                    if(groupedData[category]){
+                        groupedData[category] += value;
+                    } else {
+                        groupedData[category] = value;
+                    }
+                });
+
+                const labels = Object.keys(groupedData);
+                const data = Object.values(groupedData);
+                
+                chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: `${yCol} by ${xCol}`,
+                        data: data,
+                        backgroundColor: generateColors(data.length),
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1
+                    }]
+                };
+                chartOptions = getChartOptions(xCol, yCol);
+                calculateStatistics(data);
+            }
+            
+            renderChart(chartData, chartOptions);
+            renderDataTable(xCol, yCol);
+        }
+
+        function getChartOptions(xCol, yCol){
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: currentChartType !== 'pie' },
+                    title: { 
+                        display: true, 
+                        text: `${yCol} Analysis by ${xCol}`, 
+                        font: { 
+                            size: 18,
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        },
+                        padding: 20
+                    }
+                },
+                scales: {
+                    y: { 
+                        display: currentChartType !== 'pie', 
+                        beginAtZero: true, 
+                        title: { 
+                            display: true, 
+                            text: yCol,
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: { 
+                        display: currentChartType !== 'pie', 
+                        title: { 
+                            display: true, 
+                            text: xCol,
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            };
+        }
+        
+        function renderChart(data, options){
+            if (currentChart) currentChart.destroy();
+            const ctx = document.getElementById('dataChart').getContext('2d');
+            currentChart = new Chart(ctx, { 
+                type: currentChartType, 
+                data: data, 
+                options: options 
+            });
+        }
+
+        function renderDataTable(xCol, yCol) {
+            // Create table with all columns for preview
+            const tableHeaders = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+            const tableBody = jsonData.slice(0, 50).map(row => 
+                `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`
+            ).join('');
+            el.dataTable.innerHTML = `${tableHeaders}<tbody>${tableBody}</tbody>`;
+        }
+
+        function calculateStatistics(data) {
+            if(data.length === 0) {
+                el.statsContainer.innerHTML = '';
+                return;
+            };
+            const sum = data.reduce((a, b) => a + b, 0);
+            const mean = sum / data.length;
+            const sortedData = [...data].sort((a, b) => a - b);
+            const mid = Math.floor(sortedData.length / 2);
+            const median = sortedData.length % 2 !== 0 ? sortedData[mid] : (sortedData[mid - 1] + sortedData[mid]) / 2;
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            
+            // Calculate variance and standard deviation
+            const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / data.length;
+            const stdDev = Math.sqrt(variance);
+            
+            el.statsContainer.innerHTML = `
+                <div class="stat-item"><div class="label">Count</div><div class="value">${data.length.toLocaleString()}</div></div>
+                <div class="stat-item"><div class="label">Sum</div><div class="value">${sum.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+                <div class="stat-item"><div class="label">Average</div><div class="value">${mean.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+                <div class="stat-item"><div class="label">Median</div><div class="value">${median.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+                <div class="stat-item"><div class="label">Min</div><div class="value">${min.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+                <div class="stat-item"><div class="label">Max</div><div class="value">${max.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+                <div class="stat-item"><div class="label">Std Dev</div><div class="value">${stdDev.toLocaleString(undefined, {maximumFractionDigits: 2})}</div></div>
+            `;
+        }
+
+        function handleChartTypeChange(e) {
+            const button = e.target.closest('button');
+            if (button) {
+                el.chartTypeSelector.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                currentChartType = button.dataset.chart;
+                updateAxisDropdowns();
+                generateVisualization();
+            }
+        }
+        
+        function generateColors(numColors) {
+            const colors = [];
+            const baseColors = ['#4361ee', '#4cc9f0', '#fca311', '#e63946', '#560bad', '#1d3557', '#fb5607', '#ffbe0b'];
+            for (let i = 0; i < numColors; i++) {
+                colors.push(baseColors[i % baseColors.length] + 'B3'); // Add alpha transparency
+            }
+            return colors;
+        }
+
+        function searchContent() {
+            const searchTerm = el.searchInput.value.trim();
+            if (!searchTerm) { showAlert('Please enter a search term.', 'warning'); return; }
+            if (!rawFileContent) { showAlert('Please import data first.', 'warning'); return; }
+
+            const lines = rawFileContent.split('\n');
+            const searchResults = lines.filter(line => fuzzball.partial_ratio(searchTerm.toLowerCase(), line.toLowerCase()) > 70);
+
+            el.searchResults.classList.remove('hidden');
+            if (searchResults.length === 0) {
+                el.searchResults.innerHTML = '<div class="result-item">No matches found.</div>';
+            } else {
+                el.searchResults.innerHTML = searchResults.slice(0, 50).map(r => `<div class="result-item">${r}</div>`).join('');
+            }
+        }
+
+        function generatePDFReport() {
+            try {
+                const doc = new jsPDF();
+                const xCol = el.xAxisSelect.value;
+                const yCol = el.yAxisSelect.value;
+                
+                doc.setFontSize(22);
+                doc.text('Data Analysis Report', 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text(`File: ${el.fileName.textContent}`, 14, 35);
+                doc.text(`Date: ${new Date().toLocaleString()}`, 14, 42);
+
+                doc.setFontSize(16);
+                doc.text('Analysis Configuration', 14, 55);
+                doc.autoTable({
+                    startY: 60,
+                    body: [
+                        ['X-Axis (Category)', xCol],
+                        ['Y-Axis (Value)', yCol],
+                        ['Chart Type', currentChartType.charAt(0).toUpperCase() + currentChartType.slice(1)],
+                    ],
+                    theme: 'plain',
+                    styles: { 
+                        fontSize: 12,
+                        cellPadding: 5,
+                        lineColor: [67, 97, 238],
+                        lineWidth: 0.1
+                    }
+                });
+
+                doc.setFontSize(16);
+                doc.text('Key Statistics', 14, doc.autoTable.previous.finalY + 15);
+                doc.autoTable({
+                    startY: doc.autoTable.previous.finalY + 20,
+                    head: [['Metric', 'Value']],
+                    body: Array.from(el.statsContainer.children).map(item => [
+                        item.querySelector('.label').textContent,
+                        item.querySelector('.value').textContent
+                    ]),
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255
+                    }
+                });
+
+                if (currentChart) {
+                    const chartImage = currentChart.toBase64Image('image/png', 1.0);
+                    const chartWidth = doc.internal.pageSize.getWidth() - 30;
+                    const chartHeight = chartWidth * (currentChart.height / currentChart.width);
+                    
+                    doc.addPage();
+                    doc.setFontSize(16);
+                    doc.text('Data Visualization', 105, 20, { align: 'center' });
+                    doc.addImage(chartImage, 'PNG', 15, 30, chartWidth, chartHeight);
+                }
+
+                 // Add data table to PDF
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Data Preview', 14, 20);
+                doc.autoTable({
+                    startY: 25,
+                    head: [headers],
+                    body: jsonData.slice(0, 100).map(row => headers.map(h => row[h])),
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [67, 97, 238],
+                        textColor: 255
+                    },
+                    styles: {
+                        fontSize: 8
+                    }
+                });
+
+                doc.save(`analysis_report_${new Date().getTime()}.pdf`);
+                showAlert('PDF report generated successfully!', 'success');
+            } catch (error){
+                console.error("PDF Generation Error:", error);
+                showAlert(`Failed to generate PDF: ${error.message}`, 'danger');
+            }
+        }
+        
+        function resetApp() {
+            rawFileContent = '';
+            jsonData = [];
+            headers = [];
+            categoricalCols = [];
+            numericalCols = [];
+            if (currentChart) currentChart.destroy();
+            el.fileInfo.classList.add('hidden');
+            el.placeholderContainer.classList.remove('hidden');
+            el.chartContainer.classList.add('hidden');
+            el.dataTableContainer.classList.add('hidden');
+            el.statsContainer.innerHTML = '';
+            el.searchResults.innerHTML = '';
+            el.searchResults.classList.add('hidden');
+            el.searchInput.value = '';
+            el.sheetUrl.value = '';
+            setControlsEnabled(false);
+        }
+
+        function setControlsEnabled(enabled) {
+            el.controlsContainer.classList.toggle('hidden', !enabled);
+            el.searchInput.disabled = !enabled;
+            el.searchBtn.disabled = !enabled;
+            el.downloadBtn.disabled = !enabled;
+        }
+
+        function showLoader(show) {
+            if (show) {
+                el.placeholderContainer.innerHTML = '<div class="loader"></div><p style="margin-top: 20px;">Processing data...</p>';
+                el.placeholderContainer.classList.remove('hidden');
+                el.chartContainer.classList.add('hidden');
+            } else {
+                if(jsonData.length === 0){ // Only show placeholder text if no data is loaded
+                    el.placeholderContainer.innerHTML = `<div><i class="fas fa-chart-pie fa-3x" style="color: #ccc;"></i><p style="margin-top: 15px;">Upload a file or connect to Google Sheets to visualize data.</p></div>`;
+                }
+            }
+        }
+
+        function showAlert(message, type = 'danger') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            el.alertContainer.innerHTML = ''; // Clear previous alerts
+            el.alertContainer.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            el.yearSpan.textContent = new Date().getFullYear();
+            setupEventListeners();
+            resetApp();
+        });
+    </script>
+</body>
+</html>
