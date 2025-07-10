@@ -1,9 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Free Chart Generator | Analyze CSV, Excel & Google Sheets Data</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Data Analysis Tool</title>
+    <meta name="description" content="एक शक्तिशाली और मुफ्त ऑनलाइन डेटा विश्लेषण टूल। CSV/Excel फ़ाइलें अपलोड करें, Google Sheets से कनेक्ट करें, और तुरंत बार, लाइन, और पाई जैसे चार्ट बनाएं।">
+<meta name="keywords" content="data analysis tool, online csv viewer, excel to chart, google sheets visualizer, data visualization, free data analysis, chart generator, डेटा विश्लेषण, ऑनलाइन सीएसवी व्यूअर, चार्ट बनाएं">
+<meta name="author" content="Your Name or Company Name">
+<link rel="canonical" href="https://www.your-website-url.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.your-website-url.com/">
+<meta property="og:title" content="Advanced Data Analysis Tool | CSV, Excel, Google Sheets से चार्ट बनाएं">
+<meta property="og:description" content="अपने डेटा को आसानी से विज़ुअलाइज़ करें। CSV/Excel फ़ाइलें अपलोड करें या Google Sheets से कनेक्ट करके सुंदर और इंटरैक्टिव चार्ट बनाएं।">
+<meta property="og:image" content="https://www.your-website-url.com/path-to-your-preview-image.png">
+
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://www.your-website-url.com/">
+<meta property="twitter:title" content="Advanced Data Analysis Tool | CSV, Excel, Google Sheets से चार्ट बनाएं">
+<meta property="twitter:description" content="अपने डेटा को आसानी से विज़ुअलाइज़ करें। CSV/Excel फ़ाइलें अपलोड करें या Google Sheets से कनेक्ट करके सुंदर और इंटरैक्टिव चार्ट बनाएं।">
+<meta property="twitter:image" content="https://www.your-website-url.com/path-to-your-preview-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Advanced Data Analysis Tool",
+  "description": "एक मुफ्त वेब-आधारित उपकरण जो उपयोगकर्ताओं को सीएसवी, एक्सेल फाइलों या गूगल शीट्स से डेटा अपलोड और विश्लेषण करने की अनुमति देता है। यह उपकरण डेटा को विभिन्न प्रकार के चार्ट, जैसे बार, लाइन, पाई और स्कैटर चार्ट में कल्पना करता है।",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
+  "url": "https://www.your-website-url.com/",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.your-website-url.com/",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
