@@ -11,10 +11,10 @@
 <link rel="canonical" href="https://www.your-website-url.com/">
 
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.your-website-url.com/">
+<meta property="og:url" content="https://maheshbuye.github.io/Advance-data-annual-result-toolll/
 <meta property="og:title" content="Advanced Data Analysis Tool | CSV, Excel, Google Sheets से चार्ट बनाएं">
 <meta property="og:description" content="अपने डेटा को आसानी से विज़ुअलाइज़ करें। CSV/Excel फ़ाइलें अपलोड करें या Google Sheets से कनेक्ट करके सुंदर और इंटरैक्टिव चार्ट बनाएं।">
-<meta property="og:image" content="https://www.your-website-url.com/path-to-your-preview-image.png">
+<meta property="og:image" content="https://www.your-website-url.com/">
 
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://www.your-website-url.com/">
@@ -31,7 +31,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
-  "url": "https://www.your-website-url.com/",
+  "url": "https://maheshbuye.github.io/Advance-data-annual-result-toolll/
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -39,7 +39,7 @@
   },
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://www.your-website-url.com/",
+    "target": "https://maheshbuye.github.io/Advance-data-annual-result-toolll/
     "query-input": "required name=search_term_string"
   }
 }
